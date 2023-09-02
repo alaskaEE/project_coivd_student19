@@ -1,0 +1,441 @@
+import pandas as pd
+import psycopg2
+import requests
+import json
+from datetime import datetime
+from os import truncate
+url_split = "https://api.covid19tracker.ca/summary/split"
+response_split = requests.get(url_split)
+data_split = response_split.json()
+
+def fetch_data_split_from_api():
+    url_split = "https://api.covid19tracker.ca/summary/split"
+    response_split = requests.get(url_split)
+    data_split = response_split.json()
+    return data_split
+
+def save_data_split_to_postgresql(data):
+    conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+    cursor = conn.cursor()
+
+conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+cursor = conn.cursor()
+
+create_table_query_split = """
+CREATE TABLE IF NOT EXISTS summary_split (
+  province text,
+  date date,
+  change_cases int,
+  change_fatalities int,
+  change_tests int,
+  change_hospitalizations int,
+  change_criticals int,
+  change_recoveries int,
+  change_vaccinations int,
+  change_vaccinated int,
+  change_boosters_1 int,
+  change_vaccines_distributed int,
+  total_cases int,
+  total_fatalities int,
+  total_tests int,
+  total_hospitalizations int,
+  total_criticals int,
+  total_recoveries int,
+  total_vaccinations int,
+  total_vaccinated int,
+  total_boosters_1 int,
+  total_vaccines_distributed int
+)
+"""
+cursor.execute(create_table_query_split)
+
+truncate_table_query_split = "TRUNCATE TABLE summary_split"
+cursor.execute(truncate_table_query_split)
+
+data_split_json = json.dumps(data_split)
+data_split_list = json.loads(data_split_json)
+
+f = data_split_list['data']
+for row in f:
+        insert_query = "INSERT INTO summary_split (province, date, change_cases, change_fatalities, change_tests, change_hospitalizations, change_criticals, change_recoveries, change_vaccinations, change_vaccinated, change_boosters_1, change_vaccines_distributed, total_cases, total_fatalities, total_tests, total_hospitalizations, total_criticals, total_recoveries, total_vaccinations, total_vaccinated, total_boosters_1, total_vaccines_distributed) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(insert_query, (row['province'], row['date'], row['change_cases'], row['change_fatalities'], row['change_tests'], row['change_hospitalizations'], row['change_criticals'], row['change_recoveries'], row['change_vaccinations'], row['change_vaccinated'], row['change_boosters_1'], row['change_vaccines_distributed'], row['total_cases'], row['total_fatalities'], row['total_tests'], row['total_hospitalizations'], row['total_criticals'], row['total_recoveries'], row['total_vaccinations'], row['total_vaccinated'], row['total_boosters_1'], row['total_vaccines_distributed']))
+
+conn.commit()
+cursor.close()
+conn.close()
+
+data_split = fetch_data_split_from_api()
+save_data_split_to_postgresql(data_split)
+url_provinces = "https://api.covid19tracker.ca/provinces"
+response_provinces = requests.get(url_provinces)
+data_provinces = response_provinces.json()
+
+def fetch_data_provinces_from_api():
+    url_provinces = "https://api.covid19tracker.ca/provinces"
+    response_provinces = requests.get(url_provinces)
+    data_provinces = response_provinces.json()
+    return data_provinces
+
+def save_data_provinces_to_postgresql(data):
+    conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+    cursor = conn.cursor()
+
+conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+cursor = conn.cursor()
+
+create_table_query_provinces = """
+CREATE TABLE IF NOT EXISTS provinces (
+  id int,
+  code text,
+  name text,
+  data_source text,
+  population int,
+  area int,
+  gdp int,
+  geographic int,
+  data_status text,
+  created_at text,
+  updated_at timestamp,
+  density real
+)
+"""
+cursor.execute(create_table_query_provinces)
+
+truncate_table_query_provinces = "TRUNCATE TABLE provinces"
+cursor.execute(truncate_table_query_provinces)
+
+data_provinces_json = json.dumps(data_provinces)
+data_provinces_list = json.loads(data_provinces_json)
+
+for row in data_provinces_list:
+        insert_query = "INSERT INTO provinces (id, code, name, data_source, population, area, gdp, geographic, data_status, created_at, updated_at, density) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(insert_query, (row['id'], row['code'], row['name'], row['data_source'], row['population'], row['area'], row['gdp'], row['geographic'], row['data_status'], row['created_at'], row['updated_at'], row['density']))
+
+conn.commit()
+cursor.close()
+conn.close()
+
+data_provinces = fetch_data_provinces_from_api()
+save_data_provinces_to_postgresql(data_provinces)
+url_regions = "https://api.covid19tracker.ca/regions"
+response_regions = requests.get(url_regions)
+data_regions = response_regions.json()
+
+def fetch_data_regions_from_api():
+    url_regions = "https://api.covid19tracker.ca/regions"
+    response_regions = requests.get(url_regions)
+    data_regions = response_regions.json()
+    return data_regions
+
+def save_data_regions_to_postgresql(data):
+    conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+    cursor = conn.cursor()
+
+conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+cursor = conn.cursor()
+
+create_table_query_regions = """
+CREATE TABLE IF NOT EXISTS regions (
+    hr_uid int,
+    province text,
+    engname text,
+    frename text
+)
+"""
+cursor.execute(create_table_query_regions)
+
+truncate_table_query_regions = "TRUNCATE TABLE regions"
+cursor.execute(truncate_table_query_regions)
+
+data_regions_json = json.dumps(data_regions)
+data_regions_list = json.loads(data_regions_json)
+
+f = data_regions_list['data']
+for row in f:
+        insert_query = "INSERT INTO regions (hr_uid, province, engname, frename) VALUES (%s, %s, %s, %s)"
+        cursor.execute(insert_query, (row['hr_uid'], row['province'], row['engname'], row['frename']))
+
+conn.commit()
+cursor.close()
+conn.close()
+
+data_regions = fetch_data_regions_from_api()
+save_data_regions_to_postgresql(data_regions)
+url_sub_regions = "https://api.covid19tracker.ca/reports/sub-regions/summary"
+response_sub_regions = requests.get(url_sub_regions)
+data_sub_regions = response_sub_regions.json()
+
+def fetch_data_sub_regions_from_api():
+    url_sub_regions = "https://api.covid19tracker.ca/reports/sub-regions/summary"
+    response_sub_regions = requests.get(url_sub_regions)
+    data_sub_regions = response_sub_regions.json()
+    return data_sub_regions
+
+def save_data_sub_regions_to_postgresql(data):
+    conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+    cursor = conn.cursor()
+
+conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+cursor = conn.cursor()
+
+create_table_query_sub_regions = """
+CREATE TABLE IF NOT EXISTS sub_regions (
+    code text,
+    date date,
+    total_dose_1 int,
+    percent_dose_1 real,
+    source_dose_1 text,
+    total_dose_2 int,
+    percent_dose_2 real,
+    source_dose_2 text,
+    total_dose_3 int,
+    percent_dose_3 real,
+    source_dose_3 text
+)
+"""
+cursor.execute(create_table_query_sub_regions)
+
+truncate_table_query_sub_regions = "TRUNCATE TABLE sub_regions"
+cursor.execute(truncate_table_query_sub_regions)
+
+data_sub_regions_json = json.dumps(data_sub_regions)
+data_sub_regions_list = json.loads(data_sub_regions_json)
+
+f = data_sub_regions_list['data']
+for row in f:
+        insert_query = "INSERT INTO sub_regions (code, date, total_dose_1, percent_dose_1, source_dose_1, total_dose_2, percent_dose_2, source_dose_2, total_dose_3, percent_dose_3, source_dose_3) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(insert_query, (row['code'], row['date'], row['total_dose_1'], row['percent_dose_1'], row['source_dose_1'], row['total_dose_2'], row['percent_dose_2'], row['source_dose_2'], row['total_dose_3'], row['percent_dose_3'], row['source_dose_3']))
+
+conn.commit()
+cursor.close()
+conn.close()
+
+data_sub_regions = fetch_data_sub_regions_from_api()
+save_data_sub_regions_to_postgresql(data_sub_regions)
+url_summary = "https://api.covid19tracker.ca/summary"
+response_summary = requests.get(url_summary)
+data_summary = response_summary.json()
+
+def fetch_data_summary_from_api():
+    url_summary = "https://api.covid19tracker.ca/summary"
+    response_summary = requests.get(url_summary)
+    data_summary = response_summary.json()
+    return data_summary
+
+def save_data_summary_to_postgresql(data):
+    conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+    cursor = conn.cursor()
+
+conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+cursor = conn.cursor()
+
+create_table_query_summary = """
+CREATE TABLE IF NOT EXISTS summary (
+    latest_date date,
+    change_cases int,
+    change_fatalities int,
+    change_tests int,
+    change_hospitalizations int,
+    change_criticals int,
+    change_recoveries int,
+    change_vaccinations int,
+    change_vaccinated int,
+    change_boosters_1 int,
+    change_vaccines_distributed int,
+    total_cases int,
+    total_fatalities int,
+    total_tests int,
+    total_hospitalizations int,
+    total_criticals int,
+    total_recoveries int,
+    total_vaccinations int,
+    total_vaccinated int,
+    total_boosters_1 int,
+    total_vaccines_distributed int
+)
+"""
+cursor.execute(create_table_query_summary)
+
+truncate_table_query_summary = "TRUNCATE TABLE summary"
+cursor.execute(truncate_table_query_summary)
+
+data_summary_json = json.dumps(data_summary)
+data_summary_list = json.loads(data_summary_json)
+
+f = data_summary_list['data']
+for row in f:
+        insert_query = "INSERT INTO summary (latest_date, change_cases, change_fatalities, change_tests, change_hospitalizations, change_criticals, change_recoveries, change_vaccinations, change_vaccinated, change_boosters_1, change_vaccines_distributed, total_cases, total_fatalities, total_tests, total_hospitalizations, total_criticals, total_recoveries, total_vaccinations, total_vaccinated, total_boosters_1, total_vaccines_distributed) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(insert_query, (row['latest_date'], row['change_cases'], row['change_fatalities'], row['change_tests'], row['change_hospitalizations'], row['change_criticals'], row['change_recoveries'], row['change_vaccinations'], row['change_vaccinated'], row['change_boosters_1'], row['change_vaccines_distributed'], row['total_cases'], row['total_fatalities'], row['total_tests'], row['total_hospitalizations'], row['total_criticals'], row['total_recoveries'], row['total_vaccinations'], row['total_vaccinated'], row['total_boosters_1'], row['total_vaccines_distributed']))
+
+conn.commit()
+cursor.close()
+conn.close()
+
+data_summary = fetch_data_summary_from_api()
+save_data_summary_to_postgresql(data_summary)
+url_summary_split_hr = "https://api.covid19tracker.ca/summary/split/hr"
+response_summary_split_hr = requests.get(url_summary_split_hr)
+data_summary_split_hr = response_summary_split_hr.json()
+
+def fetch_data_summary_split_hr_from_api():
+    url_summary_split_hr = "https://api.covid19tracker.ca/summary/split/hr"
+    response_summary_split_hr = requests.get(url_summary_split_hr)
+    data_summary_split_hr = response_summary_split_hr.json()
+    return data_summary_split_hr
+
+def save_data_summary_split_hr_to_postgresql(data):
+    conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+    cursor = conn.cursor()
+
+conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+cursor = conn.cursor()
+
+create_table_query_summary_split_hr = """
+CREATE TABLE IF NOT EXISTS summary_split_hr (
+    hr_uid int,
+    date date,
+    change_cases int,
+    change_fatalities int,
+    change_tests int,
+    change_hospitalizations int,
+    change_criticals int,
+    change_recoveries int,
+    change_vaccinations int,
+    change_vaccinated int,
+    change_boosters_1 int,
+    total_cases int,
+    total_fatalities int,
+    total_tests int,
+    total_hospitalizations int,
+    total_criticals int,
+    total_recoveries int,
+    total_vaccinations int,
+    total_vaccinated int,
+    total_boosters_1 int
+)
+"""
+cursor.execute(create_table_query_summary_split_hr)
+
+truncate_table_query_summary_split_hr = "TRUNCATE TABLE summary_split_hr"
+cursor.execute(truncate_table_query_summary_split_hr)
+
+data_summary_split_hr_json = json.dumps(data_summary_split_hr)
+data_summary_split_hr_list = json.loads(data_summary_split_hr_json)
+
+f = data_summary_split_hr_list['data']
+for row in f:
+        insert_query = "INSERT INTO summary_split_hr (hr_uid, date, change_cases, change_fatalities, change_tests, change_hospitalizations, change_criticals, change_recoveries, change_vaccinations, change_vaccinated, change_boosters_1, total_cases, total_fatalities, total_tests, total_hospitalizations, total_criticals, total_recoveries, total_vaccinations, total_vaccinated, total_boosters_1) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(insert_query, (row['hr_uid'], row['date'], row['change_cases'], row['change_fatalities'], row['change_tests'], row['change_hospitalizations'], row['change_criticals'], row['change_recoveries'], row['change_vaccinations'], row['change_vaccinated'], row['change_boosters_1'], row['total_cases'], row['total_fatalities'], row['total_tests'], row['total_hospitalizations'], row['total_criticals'], row['total_recoveries'], row['total_vaccinations'], row['total_vaccinated'], row['total_boosters_1']))
+
+conn.commit()
+cursor.close()
+conn.close()
+
+data_summary_split_hr = fetch_data_summary_split_hr_from_api()
+save_data_summary_split_hr_to_postgresql(data_summary_split_hr)
+url_sb = "https://api.covid19tracker.ca/sub-regions"
+response_sb = requests.get(url_sb)
+data_sb = response_sb.json()
+
+def fetch_data_sb_from_api():
+    url_sb = "https://api.covid19tracker.ca/sub-regions"
+    response_sb = requests.get(url_sb)
+    data_sb = response_sb.json()
+    return data_sb
+
+def save_data_sb_to_postgresql(data):
+    conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+    cursor = conn.cursor()
+
+conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+cursor = conn.cursor()
+
+create_table_query_sb = """
+CREATE TABLE IF NOT EXISTS sb (
+    code text,
+    province text,
+    zone text,
+    region text,
+    population int
+)
+"""
+cursor.execute(create_table_query_sb)
+
+truncate_table_query_sb = "TRUNCATE TABLE sb"
+cursor.execute(truncate_table_query_sb)
+
+data_sb_json = json.dumps(data_sb)
+data_sb_list = json.loads(data_sb_json)
+
+f = data_sb_list['data']
+for row in f:
+        insert_query = "INSERT INTO sb (code, province, zone, region, population) VALUES (%s, %s, %s, %s, %s)"
+        cursor.execute(insert_query, (row['code'], row['province'], row['zone'], row['region'], row['population']))
+
+conn.commit()
+cursor.close()
+conn.close()
+
+data_sb = fetch_data_sb_from_api()
+save_data_sb_to_postgresql(data_sb)
+url_reports = "https://api.covid19tracker.ca/reports"
+response_reports = requests.get(url_reports)
+data_reports = response_reports.json()
+
+def fetch_data_reports_from_api():
+    url_reports = "https://api.covid19tracker.ca/reports"
+    response_reports = requests.get(url_reports)
+    data_reports = response_reports.json()
+    return data_reports
+
+def save_data_reports_to_postgresql(data):
+    conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+    cursor = conn.cursor()
+
+conn = psycopg2.connect(host="87.242.126.7", database="project_coivd_student19", port = "5432", user="student19", password="student19_password")
+cursor = conn.cursor()
+
+create_table_query_reports = """
+CREATE TABLE IF NOT EXISTS reports (
+    date date,
+    change_cases int,
+    change_fatalities int,
+    change_tests int,
+    change_hospitalizations int,
+    change_criticals int,
+    change_recoveries int,
+    change_vaccinations int,
+    change_vaccinated int,
+    change_boosters_1 int,
+    change_vaccines_distributed int,
+    total_cases int,
+    total_fatalities int,
+    total_tests int,
+    total_hospitalizations int,
+    total_criticals int,
+    total_recoveries int,
+    total_vaccinations int,
+    total_vaccinated int,
+    total_boosters_1 int,
+    total_vaccines_distributed int
+)
+"""
+cursor.execute(create_table_query_reports)
+
+truncate_table_query_reports = "TRUNCATE TABLE reports"
+cursor.execute(truncate_table_query_reports)
+
+data_reports_json = json.dumps(data_reports)
+data_reports_list = json.loads(data_reports_json)
+
+f = data_reports_list['data']
+for row in f:
+        insert_query = "INSERT INTO reports (date, change_cases, change_fatalities, change_tests, change_hospitalizations, change_criticals, change_recoveries, change_vaccinations, change_vaccinated, change_boosters_1, change_vaccines_distributed, total_cases, total_fatalities, total_tests, total_hospitalizations, total_criticals, total_recoveries, total_vaccinations, total_vaccinated, total_boosters_1, total_vaccines_distributed) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(insert_query, (row['date'], row['change_cases'], row['change_fatalities'], row['change_tests'], row['change_hospitalizations'], row['change_criticals'], row['change_recoveries'], row['change_vaccinations'], row['change_vaccinated'], row['change_boosters_1'], row['change_vaccines_distributed'], row['total_cases'], row['total_fatalities'], row['total_tests'], row['total_hospitalizations'], row['total_criticals'], row['total_recoveries'], row['total_vaccinations'], row['total_vaccinated'], row['total_boosters_1'], row['total_vaccines_distributed']))
+
+conn.commit()
+cursor.close()
+conn.close()
+
+data_reports = fetch_data_reports_from_api()
+save_data_reports_to_postgresql(data_reports)
